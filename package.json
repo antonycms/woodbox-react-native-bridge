@@ -1,0 +1,24 @@
+{
+  "name": "@woodbox/react-native-bridge",
+  "version": "0.1.0",
+  "description": "Development bridge for inspecting React Native local data with Woodbox.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "react-native-sqlite-storage": "*"
+  },
+  "peerDependenciesMeta": {
+    "react-native-sqlite-storage": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "license": "MIT"
+}
