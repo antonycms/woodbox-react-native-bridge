@@ -55,3 +55,33 @@ if (__DEV__) {
   });
 }
 ```
+
+## Uso com react-native-nitro-sqlite
+
+```ts
+import { open } from 'react-native-nitro-sqlite';
+import {
+  createReactNativeNitroSqliteAdapter,
+  startWoodboxBridge,
+} from '@woodbox/react-native-bridge';
+
+const db = open({ name: 'app.db' });
+
+if (__DEV__) {
+  startWoodboxBridge({
+    app: {
+      id: 'meu-app-dev',
+      name: 'Meu App',
+      platform: 'android',
+    },
+    adapters: [
+      createReactNativeNitroSqliteAdapter({
+        id: 'main',
+        label: 'SQLite principal',
+        database: db,
+      }),
+    ],
+  });
+}
+```
+
