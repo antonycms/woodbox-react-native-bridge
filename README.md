@@ -15,7 +15,6 @@ const db = SQLite.openDatabase({ name: 'app.db', location: 'default' });
 
 if (__DEV__) {
   startWoodboxBridge({
-    url: 'ws://IP_DA_MAQUINA:8123', // Android emulator
     app: {
       id: 'meu-app-dev',
       name: 'Meu App',

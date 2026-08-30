@@ -7,20 +7,37 @@ import type {
 import type { WoodboxBridgeAdapter } from '../adapters/types';
 
 export interface StartWoodboxBridgeParams {
-  url: string;
+  /**
+   * @default iOS simulator: 'ws://localhost:8123'
+   * @default Android emulator: 'ws://10.0.2.2:8123'
+   */
+  url?: string;
   app: {
     id?: string;
     name?: string;
     platform?: WoodboxBridgePlatform;
     deviceName?: string;
   };
-  adapters: WoodboxBridgeAdapter[];
+
+  /**
+   * @default 2000
+   */
   reconnectIntervalMs?: number;
+
+  /**
+   * @default true
+   */
   enabled?: boolean;
+
+  adapters: WoodboxBridgeAdapter[];
 }
 
 const toErrorMessage = (error: unknown) => {
   return error instanceof Error ? error.message : String(error || 'Erro desconhecido');
+};
+
+const getDefaultWoodboxBridgeUrl = (platform?: WoodboxBridgePlatform) => {
+  return platform === 'android' ? 'ws://10.0.2.2:8123' : 'ws://localhost:8123';
 };
 
 export const startWoodboxBridge = ({
@@ -32,6 +49,7 @@ export const startWoodboxBridge = ({
 }: StartWoodboxBridgeParams) => {
   if (!enabled) return { stop: () => undefined };
 
+  const bridgeUrl = url || getDefaultWoodboxBridgeUrl(app.platform);
   let socket: WebSocket | undefined;
   let closed = false;
   let reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -47,7 +65,7 @@ export const startWoodboxBridge = ({
   const connect = () => {
     if (closed) return;
 
-    socket = new WebSocket(url);
+    socket = new WebSocket(bridgeUrl);
 
     socket.onopen = () => {
       send({
