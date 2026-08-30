@@ -30,3 +30,28 @@ if (__DEV__) {
   });
 }
 ```
+## Uso com expo-sqlite
+
+```ts
+import * as SQLite from 'expo-sqlite';
+import { createExpoSqliteAdapter, startWoodboxBridge } from '@woodbox/react-native-bridge';
+
+const db = await SQLite.openDatabaseAsync('app.db');
+
+if (__DEV__) {
+  startWoodboxBridge({
+    app: {
+      id: 'meu-app-dev',
+      name: 'Meu App',
+      platform: 'android',
+    },
+    adapters: [
+      createExpoSqliteAdapter({
+        id: 'main',
+        label: 'SQLite principal',
+        database: db,
+      }),
+    ],
+  });
+}
+```

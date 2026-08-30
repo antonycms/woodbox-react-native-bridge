@@ -10,9 +10,13 @@
     "build": "tsc"
   },
   "peerDependencies": {
+    "expo-sqlite": "*",
     "react-native-sqlite-storage": "*"
   },
   "peerDependenciesMeta": {
+    "expo-sqlite": {
+      "optional": true
+    },
     "react-native-sqlite-storage": {
       "optional": true
     }
