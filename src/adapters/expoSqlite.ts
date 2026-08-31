@@ -25,6 +25,8 @@ export interface ExpoSqliteAdapterParams {
   database: ExpoSQLiteDatabase;
 }
 
+const isRowsStatement = (sql: string) => /^(select|with|pragma|explain)\b/i.test(sql.trim());
+
 const executeSql = async (
   database: ExpoSQLiteDatabase,
   { sql, params = [] }: ExecuteSqlParams,
@@ -33,7 +35,7 @@ const executeSql = async (
 
   try {
     const result = await statement.executeAsync(params);
-    const rows = await result.getAllAsync();
+    const rows = isRowsStatement(sql) ? await result.getAllAsync() : [];
 
     return {
       rows,
