@@ -25,6 +25,21 @@ export interface StartWoodboxBridgeParams {
   reconnectIntervalMs?: number;
 
   /**
+   * @default 10000
+   */
+  maxReconnectIntervalMs?: number;
+
+  /**
+   * @default 5000
+   */
+  heartbeatIntervalMs?: number;
+
+  /**
+   * @default 10000
+   */
+  connectionTimeoutMs?: number;
+
+  /**
    * @default true
    */
   enabled?: boolean;
@@ -45,6 +60,9 @@ export const startWoodboxBridge = ({
   app,
   adapters,
   reconnectIntervalMs = 2000,
+  maxReconnectIntervalMs = 10000,
+  heartbeatIntervalMs = 5000,
+  connectionTimeoutMs = 10000,
   enabled = true,
 }: StartWoodboxBridgeParams) => {
   if (!enabled) return { stop: () => undefined };
@@ -52,30 +70,108 @@ export const startWoodboxBridge = ({
   const bridgeUrl = url || getDefaultWoodboxBridgeUrl(app.platform);
   let socket: WebSocket | undefined;
   let closed = false;
+  let reconnectAttempts = 0;
   let reconnectTimeout: ReturnType<typeof setTimeout> | undefined;
+  let heartbeatInterval: ReturnType<typeof setInterval> | undefined;
+  let connectionTimeout: ReturnType<typeof setTimeout> | undefined;
 
   const adapterMap = new Map(adapters.map((adapter) => [adapter.id, adapter]));
 
-  const send = (message: WoodboxBridgeResponseMessage | WoodboxBridgeHelloMessage) => {
-    if (socket?.readyState === WebSocket.OPEN) {
+  const clearReconnectTimeout = () => {
+    if (!reconnectTimeout) return;
+
+    clearTimeout(reconnectTimeout);
+    reconnectTimeout = undefined;
+  };
+
+  const clearHeartbeat = () => {
+    if (!heartbeatInterval) return;
+
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = undefined;
+  };
+
+  const clearConnectionTimeout = () => {
+    if (!connectionTimeout) return;
+
+    clearTimeout(connectionTimeout);
+    connectionTimeout = undefined;
+  };
+
+  const send = (
+    message: WoodboxBridgeResponseMessage | WoodboxBridgeHelloMessage | { type: 'ping'; time: number },
+  ) => {
+    if (socket?.readyState !== WebSocket.OPEN) return false;
+
+    try {
       socket.send(JSON.stringify(message));
+      return true;
+    } catch {
+      return false;
     }
+  };
+
+  const scheduleReconnect = () => {
+    if (closed || reconnectTimeout) return;
+
+    clearHeartbeat();
+    clearConnectionTimeout();
+
+    const delay = Math.min(
+      reconnectIntervalMs * 2 ** reconnectAttempts,
+      maxReconnectIntervalMs,
+    );
+
+    reconnectAttempts += 1;
+    reconnectTimeout = setTimeout(() => {
+      reconnectTimeout = undefined;
+      connect();
+    }, delay);
+  };
+
+  const startHeartbeat = () => {
+    clearHeartbeat();
+
+    heartbeatInterval = setInterval(() => {
+      const sent = send({ type: 'ping', time: Date.now() });
+
+      if (!sent) {
+        socket?.close();
+        scheduleReconnect();
+      }
+    }, heartbeatIntervalMs);
   };
 
   const connect = () => {
     if (closed) return;
 
-    socket = new WebSocket(bridgeUrl);
+    clearReconnectTimeout();
+    const currentSocket = new WebSocket(bridgeUrl);
+    socket = currentSocket;
 
-    socket.onopen = () => {
+    connectionTimeout = setTimeout(() => {
+      if (socket !== currentSocket || currentSocket.readyState !== WebSocket.CONNECTING) return;
+
+      currentSocket.close();
+      scheduleReconnect();
+    }, connectionTimeoutMs);
+
+    currentSocket.onopen = () => {
+      if (socket !== currentSocket) return;
+
+      clearConnectionTimeout();
+      reconnectAttempts = 0;
       send({
         type: 'hello',
         app,
         adapters: adapters.map(({ executeSql: _executeSql, ...adapter }) => adapter),
       });
+      startHeartbeat();
     };
 
-    socket.onmessage = async (event) => {
+    currentSocket.onmessage = async (event) => {
+      if (socket !== currentSocket) return;
+
       const message = JSON.parse(String(event.data)) as WoodboxBridgeRequestMessage;
 
       if (message.type !== 'request') return;
@@ -110,9 +206,20 @@ export const startWoodboxBridge = ({
       }
     };
 
-    socket.onclose = () => {
-      if (closed) return;
-      reconnectTimeout = setTimeout(connect, reconnectIntervalMs);
+    currentSocket.onerror = () => {
+      if (socket !== currentSocket || closed) return;
+
+      currentSocket.close();
+      scheduleReconnect();
+    };
+
+    currentSocket.onclose = () => {
+      if (socket !== currentSocket) return;
+
+      clearHeartbeat();
+      clearConnectionTimeout();
+      socket = undefined;
+      scheduleReconnect();
     };
   };
 
@@ -121,7 +228,9 @@ export const startWoodboxBridge = ({
   return {
     stop() {
       closed = true;
-      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      clearReconnectTimeout();
+      clearHeartbeat();
+      clearConnectionTimeout();
       socket?.close();
     },
   };
