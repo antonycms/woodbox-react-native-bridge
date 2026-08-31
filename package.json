@@ -10,11 +10,15 @@
     "build": "tsc"
   },
   "peerDependencies": {
+    "@react-native-async-storage/async-storage": "*",
     "expo-sqlite": "*",
     "react-native-nitro-sqlite": "*",
     "react-native-sqlite-storage": "*"
   },
   "peerDependenciesMeta": {
+    "@react-native-async-storage/async-storage": {
+      "optional": true
+    },
     "expo-sqlite": {
       "optional": true
     },
