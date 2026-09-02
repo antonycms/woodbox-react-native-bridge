@@ -1,4 +1,4 @@
-# @woodbox/react-native-bridge
+# woodbox-react-native-bridge
 
 Bridge de desenvolvimento para inspecionar e editar dados locais de apps React Native pelo Woodbox.
 
@@ -7,7 +7,7 @@ Bridge de desenvolvimento para inspecionar e editar dados locais de apps React N
 
 ```ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createAsyncStorageAdapter, startWoodboxBridge } from '@woodbox/react-native-bridge';
+import { createAsyncStorageAdapter, startWoodboxBridge } from 'woodbox-react-native-bridge';
 
 if (__DEV__) {
   startWoodboxBridge({
@@ -37,7 +37,7 @@ import SQLite from 'react-native-sqlite-storage';
 import {
   createReactNativeSqliteStorageAdapter,
   startWoodboxBridge,
-} from '@woodbox/react-native-bridge';
+} from 'woodbox-react-native-bridge';
 
 const db = SQLite.openDatabase({ name: 'app.db', location: 'default' });
 
@@ -62,7 +62,7 @@ if (__DEV__) {
 
 ```ts
 import * as SQLite from 'expo-sqlite';
-import { createExpoSqliteAdapter, startWoodboxBridge } from '@woodbox/react-native-bridge';
+import { createExpoSqliteAdapter, startWoodboxBridge } from 'woodbox-react-native-bridge';
 
 const db = await SQLite.openDatabaseAsync('app.db');
 
@@ -91,7 +91,7 @@ import { open } from 'react-native-nitro-sqlite';
 import {
   createReactNativeNitroSqliteAdapter,
   startWoodboxBridge,
-} from '@woodbox/react-native-bridge';
+} from 'woodbox-react-native-bridge';
 
 const db = open({ name: 'app.db' });
 
