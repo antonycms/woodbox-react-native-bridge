@@ -4,6 +4,10 @@ Development bridge for inspecting and editing local React Native app data direct
 
 It exposes supported local storage engines as SQLite-compatible adapters over a WebSocket connection, so Woodbox can browse tables, run SQL, inspect rows, and edit development data without adding one-off debug screens to your app.
 
+## Related project
+
+- [Woodbox](https://github.com/antonycms/woodbox) — the desktop database manager that discovers and connects to this bridge.
+
 ## Features
 
 - Connects a React Native app to Woodbox during development.

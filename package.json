@@ -1,6 +1,6 @@
 {
   "name": "woodbox-react-native-bridge",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Development bridge for inspecting and editing React Native local data with Woodbox.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
