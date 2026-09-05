@@ -1,7 +1,7 @@
 {
   "name": "woodbox-react-native-bridge",
   "version": "0.1.0",
-  "description": "Development bridge for inspecting React Native local data with Woodbox.",
+  "description": "Development bridge for inspecting and editing React Native local data with Woodbox.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -35,5 +35,21 @@
   "devDependencies": {
     "typescript": "^7.0.2"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "woodbox",
+    "react-native",
+    "sqlite",
+    "async-storage",
+    "debugging",
+    "database"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antonycms/woodbox-react-native-bridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/antonycms/woodbox-react-native-bridge/issues"
+  },
+  "homepage": "https://github.com/antonycms/woodbox-react-native-bridge#readme"
 }
